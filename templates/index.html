@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SéanceCode — Occult Diagnostic & Code Purification Ledger</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-obsidian: #0b0a09;
+      --bg-surface: #12100e;
+      --bg-elevated: #181512;
+      --border-hairline: rgba(197, 155, 82, 0.22);
+      --border-strong: rgba(197, 155, 82, 0.45);
+      --brass: #c59b52;
+      --brass-dim: #8c6d36;
+      --ivory: #eae2d3;
+      --ash: #8e8577;
+      --crimson: #c84648;
+      --verdigris: #4e9a74;
+    }
+
+    body {
+      background-color: var(--bg-obsidian);
+      color: var(--ivory);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(197, 155, 82, 0.06) 0%, transparent 60%),
+        linear-gradient(to bottom, #0b0a09, #080706);
+    }
+
+    /* Subtle physical paper/film grain overlay */
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.032;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .font-engraved { font-family: 'Cinzel', serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+
+    /* Architectural hairline frame with corner registration ticks */
+    .ledger-frame {
+      position: relative;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+    }
+    .ledger-frame::before,
+    .ledger-frame::after {
+      content: '';
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border-color: var(--brass);
+      pointer-events: none;
+    }
+    .ledger-frame::before {
+      top: -1px;
+      left: -1px;
+      border-top: 1px solid var(--brass);
+      border-left: 1px solid var(--brass);
+    }
+    .ledger-frame::after {
+      bottom: -1px;
+      right: -1px;
+      border-bottom: 1px solid var(--brass);
+      border-right: 1px solid var(--brass);
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0a09; }
+    ::-webkit-scrollbar-thumb { background: #2c261f; }
+    ::-webkit-scrollbar-thumb:hover { background: #4a3f32; }
+
+    @keyframes spinClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spinCounter {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    .ring-idle-cw { transform-origin: 100px 100px; animation: spinClockwise 75s linear infinite; }
+    .ring-idle-ccw { transform-origin: 100px 100px; animation: spinCounter 55s linear infinite; }
+    .ring-active-cw { transform-origin: 100px 100px; animation: spinClockwise 4s linear infinite; }
+    .ring-active-ccw { transform-origin: 100px 100px; animation: spinCounter 2.8s linear infinite; }
+
+    .btn-brass {
+      background: linear-gradient(180deg, #d1a85c 0%, #a9813b 100%);
+      color: #0b0a09;
+      border: 1px solid #e2be79;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 18px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+    }
+    .btn-brass:hover:not(:disabled) {
+      background: linear-gradient(180deg, #deb66b 0%, #b88d43 100%);
+      transform: translateY(-1px);
+    }
+    .btn-brass:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-[#c59b52] selection:text-[#0b0a09]">
+  <div class="grain-overlay"></div>
+
+  <!-- Masthead -->
+  <header class="border-b border-[#c59b52]/20 bg-[#0b0a09]/95 sticky top-0 z-30">
+    <div class="max-w-[1380px] mx-auto px-5 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-9 h-9 border border-[#c59b52]/50 flex items-center justify-center bg-[#14110e]">
+          <svg class="w-5 h-5 text-[#c59b52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <circle cx="12" cy="12" r="9.5" />
+            <circle cx="12" cy="12" r="4" />
+            <line x1="12" y1="1" x2="12" y2="5" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="1" y1="12" x2="5" y2="12" />
+            <line x1="19" y1="12" x2="23" y2="12" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-baseline gap-3">
+            <h1 class="font-engraved text-lg sm:text-xl font-semibold tracking-[0.18em] text-[#eae2d3]">
+              SÉANCE<span class="text-[#c59b52]">CODE</span>
+            </h1>
+            <span class="hidden sm:inline-block text-[10px] font-mono-code uppercase tracking-[0.2em] text-[#8e8577] border-l border-[#c59b52]/25 pl-3">
+              Vol. IV · Occult Static & AI Exorcist
+            </span>
+          </div>
+          <p class="font-display italic text-sm text-[#9e9485] -mt-0.5">
+            Diagnostic ritual for haunted stack traces, cursed mutations &amp; decaying legacy vessels
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 text-[11px] font-mono-code text-[#8e8577]">
+        <span class="hidden md:inline">SHORTCUT: <kbd class="px-1.5 py-0.5 bg-[#181512] border border-[#c59b52]/30 text-[#c59b52]">CTRL + ENTER</kbd></span>
+        <span class="px-2.5 py-1 border border-[#c59b52]/30 bg-[#14110e] text-[#c59b52] tracking-wider uppercase">
+          KIRO SPEC ENGINE
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1380px] mx-auto px-5 sm:px-8 py-8 space-y-10">
+
+    <!-- Main Two-Column Workstation -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-stretch">
+
+      <!-- Left Column: The Summoning Altar (5 cols) -->
+      <section class="lg:col-span-5 ledger-frame p-6 flex flex-col justify-between space-y-5">
+        <div class="space-y-4">
+          <!-- Section Title & Language Selector -->
+          <div class="flex items-center justify-between border-b border-[#c59b52]/15 pb-3.5">
+            <div>
+              <span class="block text-[10px] font-mono-code uppercase tracking-[0.22em] text-[#8c6d36]">Instrument I</span>
+              <h2 class="font-display text-2xl font-semibold text-[#eae2d3] tracking-wide">The Summoning Altar</h2>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label for="languageSelect" class="sr-only">Language</label>
+              <select id="languageSelect"
+                class="bg-[#181512] border border-[#c59b52]/35 text-[#eae2d3] font-mono-code text-xs px-3 py-1.5 focus:outline-none focus:border-[#c59b52] cursor-pointer">
+                <option value="Python">Python</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="SQL">SQL</option>
+                <option value="PHP">PHP</option>
+                <option value="Other">Stack Trace</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sample Specimens -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono-code uppercase tracking-wider text-[#8e8577]">Cursed Specimens:</span>
+              <button type="button" onclick="clearAltar()"
+                class="text-[11px] font-mono-code text-[#8e8577] hover:text-[#c84648] underline underline-offset-4 transition cursor-pointer">
+                Clear Altar
+              </button>
+            </div>
+            <div id="sampleButtons" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-1.5"></div>
+          </div>
+
+          <!-- Code Editor Box -->
+          <div class="border border-[#c59b52]/25 bg-[#080706] focus-within:border-[#c59b52]/70 transition">
+            <div class="flex items-center justify-between px-3.5 py-2 border-b border-[#c59b52]/15 bg-[#100e0c] text-[11px] font-mono-code text-[#8e8577]">
+              <span>VESSEL_INPUT.SRC</span>
+              <span id="editorTelemetry">0 LINES · 0 / 15,000 CHARS</span>
+            </div>
+            <textarea id="codeInput" rows="13" spellcheck="false"
+              placeholder="// Inscribe afflicted code, legacy spaghetti, or fatal tracebacks here..."
+              class="w-full bg-transparent p-4 font-mono-code text-xs sm:text-[13px] leading-relaxed text-[#e6c7c2] placeholder-[#524b42] focus:outline-none resize-y"></textarea>
+          </div>
+
+          <!-- Validation Error Banner -->
+          <div id="errorBanner" class="hidden border-l-2 border-[#c84648] bg-[#241111] px-4 py-3 text-xs text-[#f0b6b7] font-mono-code"></div>
+        </div>
+
+        <!-- Primary Action Button -->
+        <button id="exorciseBtn" onclick="performExorcism()"
+          class="btn-brass w-full py-3.5 px-6 font-engraved font-semibold tracking-[0.2em] text-xs sm:text-sm uppercase flex items-center justify-center gap-3 cursor-pointer">
+          <span id="btnText">Invoke Exorcism Ritual</span>
+        </button>
+      </section>
+
+      <!-- Right Column: Diagnostic Astrolabe & Result Ledger (7 cols) -->
+      <section class="lg:col-span-7 ledger-frame p-6 flex flex-col justify-between min-h-[560px]">
+
+        <!-- State A: Engraved Astrolabe Idle / Channeling State -->
+        <div id="ritualPlaceholder" class="my-auto py-12 px-4 flex flex-col items-center text-center space-y-6">
+          <div class="relative w-48 h-48 flex items-center justify-center">
+            <svg id="astrolabeSvg" class="w-48 h-48 text-[#c59b52]" viewBox="0 0 200 200" fill="none">
+              <!-- Outer calibrated brass ring -->
+              <g id="outerRing" class="ring-idle-cw">
+                <circle cx="100" cy="100" r="92" stroke="currentColor" stroke-opacity="0.35" stroke-width="0.8" />
+                <circle cx="100" cy="100" r="85" stroke="currentColor" stroke-opacity="0.2" stroke-width="0.6" stroke-dasharray="2 4" />
+                <line x1="100" y1="4" x2="100" y2="14" stroke="currentColor" stroke-opacity="0.7" stroke-width="1" />
+                <line x1="100" y1="186" x2="100" y2="196" stroke="currentColor" stroke-opacity="0.7" stroke-width="1" />
+                <line x1="4" y1="100" x2="14" y2="100" stroke="currentColor" stroke-opacity="0.7" stroke-width="1" />
+                <line x1="186" y1="100" x2="196" y2="100" stroke="currentColor" stroke-opacity="0.7" stroke-width="1" />
+                <polygon points="100,15 173,142 27,142" stroke="currentColor" stroke-opacity="0.22" stroke-width="0.7" />
+              </g>
+              <!-- Inner counter-rotating geometric astrolabe -->
+              <g id="innerRing" class="ring-idle-ccw">
+                <circle cx="100" cy="100" r="62" stroke="currentColor" stroke-opacity="0.4" stroke-width="0.8" />
+                <polygon points="100,185 173,58 27,58" stroke="currentColor" stroke-opacity="0.25" stroke-width="0.7" />
+                <circle cx="100" cy="38" r="2.5" fill="currentColor" fill-opacity="0.6" />
+                <circle cx="154" cy="131" r="2.5" fill="currentColor" fill-opacity="0.6" />
+                <circle cx="46" cy="131" r="2.5" fill="currentColor" fill-opacity="0.6" />
+              </g>
+              <!-- Fixed Center Oculus -->
+              <circle cx="100" cy="100" r="22" stroke="currentColor" stroke-opacity="0.55" stroke-width="1" />
+              <circle cx="100" cy="100" r="4" fill="currentColor" fill-opacity="0.85" />
+            </svg>
+          </div>
+
+          <div class="max-w-md space-y-2">
+            <span class="text-[10px] font-mono-code uppercase tracking-[0.25em] text-[#8c6d36]">Awaiting Subject</span>
+            <h3 id="ritualStatusTitle" class="font-display text-2xl sm:text-3xl font-semibold text-[#eae2d3]">
+              The Astrolabe Stands Ready
+            </h3>
+            <p id="ritualStatusSub" class="text-xs sm:text-sm text-[#8e8577] leading-relaxed">
+              Select an archived cursed specimen on the left or inscribe your own broken source code to trace its execution pathology and synthesize a purified vessel.
+            </p>
+          </div>
+        </div>
+
+        <!-- State B: Exorcism Result Dossier -->
+        <div id="resultContainer" class="hidden space-y-5">
+          <!-- Top Dossier Header -->
+          <div class="flex flex-wrap items-start justify-between gap-4 border-b border-[#c59b52]/20 pb-4">
+            <div class="space-y-1.5">
+              <div class="flex items-center gap-2.5">
+                <span id="severityBadge" class="text-[10px] font-mono-code font-semibold uppercase tracking-[0.16em] px-2.5 py-0.5"></span>
+                <span id="dossierMeta" class="text-[11px] font-mono-code text-[#8e8577]"></span>
+              </div>
+              <h2 id="curseName" class="font-display text-2xl sm:text-3xl font-bold text-[#eae2d3] leading-tight"></h2>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="copyPurifiedCode()"
+                class="px-3 py-1.5 text-[11px] font-mono-code uppercase tracking-wider bg-[#181512] hover:bg-[#221e19] border border-[#c59b52]/35 text-[#eae2d3] transition cursor-pointer">
+                Copy Code
+              </button>
+              <button type="button" onclick="downloadScroll()"
+                class="px-3 py-1.5 text-[11px] font-mono-code uppercase tracking-wider bg-[#1d1811] hover:bg-[#292117] border border-[#c59b52]/60 text-[#c59b52] transition cursor-pointer">
+                Export .MD
+              </button>
+            </div>
+          </div>
+
+          <!-- Spectral Diagnosis -->
+          <div class="bg-[#161310] border-l-2 border-[#c59b52] p-4 space-y-1.5">
+            <h3 class="text-[10px] font-mono-code uppercase tracking-[0.2em] text-[#c59b52]">Pathology &amp; Root Cause</h3>
+            <p id="spectralDiagnosis" class="text-xs sm:text-sm text-[#d8cfc0] leading-relaxed"></p>
+          </div>
+
+          <!-- Astral Fault Trace (3 Sequential Nodes) -->
+          <div class="space-y-2">
+            <h3 class="text-[10px] font-mono-code uppercase tracking-[0.2em] text-[#8e8577]">Execution Fault Trace</h3>
+            <div id="astralNodes" class="grid grid-cols-1 md:grid-cols-3 gap-2.5"></div>
+          </div>
+
+          <!-- Code Output Tabs: Purified Vessel vs Side-by-Side Comparison -->
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#c59b52]/15 pb-2">
+              <div class="flex items-center gap-1">
+                <button type="button" id="tabPurifiedBtn" onclick="switchCodeTab('purified')"
+                  class="px-3 py-1 text-[11px] font-mono-code uppercase tracking-wider bg-[#1f1b16] text-[#c59b52] border border-[#c59b52]/40 cursor-pointer">
+                  Purified Vessel
+                </button>
+                <button type="button" id="tabCompareBtn" onclick="switchCodeTab('compare')"
+                  class="px-3 py-1 text-[11px] font-mono-code uppercase tracking-wider bg-transparent text-[#8e8577] hover:text-[#eae2d3] border border-transparent cursor-pointer">
+                  Cursed vs. Purified
+                </button>
+              </div>
+              <span id="copyFeedback" class="text-[11px] font-mono-code text-[#4e9a74] hidden">✓ Copied to clipboard</span>
+            </div>
+
+            <!-- Single Purified View -->
+            <div id="viewPurified">
+              <pre class="bg-[#080706] border border-[#4e9a74]/35 p-4 overflow-x-auto max-h-72"><code id="purifiedCode" class="font-mono-code text-xs sm:text-[13px] leading-relaxed text-[#b9e0c9]"></code></pre>
+            </div>
+
+            <!-- Side-by-Side Comparison View -->
+            <div id="viewCompare" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="border border-[#c84648]/35 bg-[#080706]">
+                <div class="px-3 py-1.5 bg-[#190e0e] border-b border-[#c84648]/25 text-[10px] font-mono-code uppercase tracking-wider text-[#e08b8c]">
+                  Afflicted Input
+                </div>
+                <pre class="p-3 overflow-x-auto max-h-64"><code id="compareOriginalCode" class="font-mono-code text-xs leading-relaxed text-[#d9a7a8]"></code></pre>
+              </div>
+              <div class="border border-[#4e9a74]/35 bg-[#080706]">
+                <div class="px-3 py-1.5 bg-[#0e1913] border-b border-[#4e9a74]/25 text-[10px] font-mono-code uppercase tracking-wider text-[#84cca5]">
+                  Purified Output
+                </div>
+                <pre class="p-3 overflow-x-auto max-h-64"><code id="comparePurifiedCode" class="font-mono-code text-xs leading-relaxed text-[#b9e0c9]"></code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prevention Ward -->
+          <div class="border border-[#c59b52]/25 bg-[#15120e] px-4 py-3 flex items-start gap-3">
+            <span class="font-engraved text-xs text-[#c59b52] mt-0.5">WARD</span>
+            <p class="text-xs text-[#d6ccb9] leading-relaxed"><span id="preventionWard"></span></p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom Archive: Grimoire of Banished Bugs -->
+    <section class="ledger-frame p-6 space-y-5">
+      <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#c59b52]/20 pb-4">
+        <div>
+          <span class="block text-[10px] font-mono-code uppercase tracking-[0.22em] text-[#8c6d36]">Persistent SQLite Ledger</span>
+          <h2 class="font-display text-2xl sm:text-3xl font-semibold text-[#eae2d3]">Grimoire of Banished Entities</h2>
+        </div>
+        <span id="grimoireCount" class="text-[11px] font-mono-code uppercase tracking-widest px-3 py-1 bg-[#181512] border border-[#c59b52]/30 text-[#c59b52]">
+          0 FOLIOS ARCHIVED
+        </span>
+      </div>
+
+      <div id="grimoireGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-[1380px] mx-auto px-5 sm:px-8 py-6 border-t border-[#c59b52]/15 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono-code text-[#6f675b]">
+    <span>SÉANCECODE · KIROWEEN 2026</span>
+    <span>ENGINEERED WITH KIRO SPECS, STEERING DOCS &amp; HYPOTHESIS PBT</span>
+  </footer>
+
+  <script>
+    let currentExorcism = null;
+    let sampleList = [];
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function toRoman(num) {
+      const map = [
+        [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+        [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+        [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']
+      ];
+      let n = Math.max(1, Number(num) || 1);
+      let out = '';
+      for (const [val, sym] of map) {
+        while (n >= val) { out += sym; n -= val; }
+      }
+      return out;
+    }
+
+    function updateTelemetry() {
+      const val = document.getElementById('codeInput').value;
+      const lines = val ? val.split('\n').length : 0;
+      document.getElementById('editorTelemetry').textContent = `${lines} LINES · ${val.length.toLocaleString()} / 15,000 CHARS`;
+    }
+
+    function getSeverityStyle(severity) {
+      if (severity === 'Eldritch Horror') {
+        return 'bg-[#2a1112] text-[#eb8a8c] border border-[#c84648]/60';
+      }
+      if (severity === 'Vengeful Wraith') {
+        return 'bg-[#261c10] text-[#e3b96b] border border-[#c59b52]/60';
+      }
+      return 'bg-[#12221a] text-[#7cc49f] border border-[#4e9a74]/60';
+    }
+
+    async function loadSamples() {
+      const res = await fetch('/api/samples');
+      const data = await res.json();
+      sampleList = data.samples || [];
+      const container = document.getElementById('sampleButtons');
+      container.innerHTML = sampleList.map((s, idx) => `
+        <button type="button" onclick="applySample(${idx})"
+          class="text-left px-3 py-2 bg-[#161310] hover:bg-[#1f1a15] border border-[#c59b52]/20 hover:border-[#c59b52]/55 transition flex items-center justify-between gap-2 cursor-pointer group">
+          <span class="text-xs text-[#d6ccb9] group-hover:text-[#eae2d3] truncate">${escapeHtml(s.title.split('(')[0].trim())}</span>
+          <span class="text-[10px] font-mono-code uppercase px-1.5 py-0.5 bg-[#0b0a09] border border-[#c59b52]/25 text-[#c59b52] shrink-0">${escapeHtml(s.language)}</span>
+        </button>
+      `).join('');
+    }
+
+    function applySample(idx) {
+      const sample = sampleList[idx];
+      if (!sample) return;
+      document.getElementById('codeInput').value = sample.code;
+      document.getElementById('languageSelect').value = sample.language;
+      document.getElementById('errorBanner').classList.add('hidden');
+      updateTelemetry();
+    }
+
+    function clearAltar() {
+      document.getElementById('codeInput').value = '';
+      document.getElementById('errorBanner').classList.add('hidden');
+      document.getElementById('resultContainer').classList.add('hidden');
+      document.getElementById('ritualPlaceholder').classList.remove('hidden');
+      document.getElementById('ritualStatusTitle').textContent = 'The Astrolabe Stands Ready';
+      currentExorcism = null;
+      updateTelemetry();
+    }
+
+    function switchCodeTab(mode) {
+      const purifiedView = document.getElementById('viewPurified');
+      const compareView = document.getElementById('viewCompare');
+      const purifiedBtn = document.getElementById('tabPurifiedBtn');
+      const compareBtn = document.getElementById('tabCompareBtn');
+
+      if (mode === 'compare') {
+        purifiedView.classList.add('hidden');
+        compareView.classList.remove('hidden');
+        compareBtn.className = 'px-3 py-1 text-[11px] font-mono-code uppercase tracking-wider bg-[#1f1b16] text-[#c59b52] border border-[#c59b52]/40 cursor-pointer';
+        purifiedBtn.className = 'px-3 py-1 text-[11px] font-mono-code uppercase tracking-wider bg-transparent text-[#8e8577] hover:text-[#eae2d3] border border-transparent cursor-pointer';
+      } else {
+        compareView.classList.add('hidden');
+        purifiedView.classList.remove('hidden');
+        purifiedBtn.className = 'px-3 py-1 text-[11px] font-mono-code uppercase tracking-wider bg-[#1f1b16] text-[#c59b52] border border-[#c59b52]/40 cursor-pointer';
+        compareBtn.className = 'px-3 py-1 text-[11px] font-mono-code uppercase tracking-wider bg-transparent text-[#8e8577] hover:text-[#eae2d3] border border-transparent cursor-pointer';
+      }
+    }
+
+    function renderExorcism(data) {
+      currentExorcism = data;
+      document.getElementById('ritualPlaceholder').classList.add('hidden');
+      document.getElementById('resultContainer').classList.remove('hidden');
+
+      const badge = document.getElementById('severityBadge');
+      badge.className = `text-[10px] font-mono-code font-semibold uppercase tracking-[0.16em] px-2.5 py-0.5 ${getSeverityStyle(data.severity)}`;
+      badge.textContent = data.severity;
+
+      document.getElementById('dossierMeta').textContent = `FOLIO ${toRoman(data.id || 1)} · ${data.language.toUpperCase()} · ${data.created_at || ''}`;
+      document.getElementById('curseName').textContent = data.curse_name;
+      document.getElementById('spectralDiagnosis').textContent = data.spectral_diagnosis;
+      document.getElementById('purifiedCode').textContent = data.purified_code;
+      document.getElementById('compareOriginalCode').textContent = data.original_code || document.getElementById('codeInput').value;
+      document.getElementById('comparePurifiedCode').textContent = data.purified_code;
+      document.getElementById('preventionWard').textContent = data.prevention_ward;
+
+      const nodesContainer = document.getElementById('astralNodes');
+      nodesContainer.innerHTML = (data.astral_nodes || []).map((node, i) => `
+        <div class="bg-[#15120f] border border-[#c59b52]/20 p-3 space-y-1">
+          <span class="block text-[10px] font-mono-code text-[#8c6d36]">TRACE 0${i + 1}</span>
+          <p class="text-xs text-[#d6ccb9] leading-relaxed">${escapeHtml(node)}</p>
+        </div>
+      `).join('');
+
+      switchCodeTab('purified');
+    }
+
+    async function performExorcism() {
+      const code = document.getElementById('codeInput').value;
+      const language = document.getElementById('languageSelect').value;
+      const errorBanner = document.getElementById('errorBanner');
+      const btn = document.getElementById('exorciseBtn');
+      const outerRing = document.getElementById('outerRing');
+      const innerRing = document.getElementById('innerRing');
+
+      errorBanner.classList.add('hidden');
+      btn.disabled = true;
+      document.getElementById('btnText').textContent = 'Channeling Astrolabe...';
+      document.getElementById('ritualPlaceholder').classList.remove('hidden');
+      document.getElementById('resultContainer').classList.add('hidden');
+      document.getElementById('ritualStatusTitle').textContent = 'Dissecting Spectral Pathology...';
+      outerRing.setAttribute('class', 'ring-active-cw');
+      innerRing.setAttribute('class', 'ring-active-ccw');
+
+      try {
+        const res = await fetch('/api/exorcise', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, language })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'The ritual was interrupted.');
+        }
+        renderExorcism(data);
+        await loadGrimoire();
+      } catch (err) {
+        errorBanner.textContent = err.message;
+        errorBanner.classList.remove('hidden');
+        document.getElementById('ritualStatusTitle').textContent = 'The Astrolabe Stands Ready';
+      } finally {
+        btn.disabled = false;
+        document.getElementById('btnText').textContent = 'Invoke Exorcism Ritual';
+        outerRing.setAttribute('class', 'ring-idle-cw');
+        innerRing.setAttribute('class', 'ring-idle-ccw');
+      }
+    }
+
+    async function loadGrimoire() {
+      const res = await fetch('/api/grimoire');
+      const data = await res.json();
+      const items = data.grimoire || [];
+      document.getElementById('grimoireCount').textContent = `${items.length} ${items.length === 1 ? 'FOLIO' : 'FOLIOS'} ARCHIVED`;
+
+      const grid = document.getElementById('grimoireGrid');
+      if (items.length === 0) {
+        grid.innerHTML = `<p class="text-xs font-mono-code text-[#6f675b] col-span-full py-4">No entities recorded in the ledger yet. Invoke a ritual above to seal your first folio.</p>`;
+        return;
+      }
+
+      grid.innerHTML = items.map((item, index) => `
+        <article onclick='renderExorcism(window.__grimoireCache[${index}])'
+          class="bg-[#15120f] hover:bg-[#1b1713] border border-[#c59b52]/20 hover:border-[#c59b52]/55 p-4 space-y-2.5 cursor-pointer transition group">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-mono-code text-[#8c6d36]">FOLIO ${toRoman(item.id)} · ${escapeHtml(item.language)}</span>
+            <span class="text-[9px] font-mono-code uppercase tracking-wider px-2 py-0.5 ${getSeverityStyle(item.severity)}">${escapeHtml(item.severity)}</span>
+          </div>
+          <h4 class="font-display text-lg font-bold text-[#eae2d3] group-hover:text-[#c59b52] transition line-clamp-1">${escapeHtml(item.curse_name)}</h4>
+          <p class="text-xs text-[#8e8577] line-clamp-2 leading-relaxed">${escapeHtml(item.spectral_diagnosis)}</p>
+        </article>
+      `).join('');
+      window.__grimoireCache = items;
+    }
+
+    function copyPurifiedCode() {
+      if (!currentExorcism) return;
+      navigator.clipboard.writeText(currentExorcism.purified_code);
+      const fb = document.getElementById('copyFeedback');
+      fb.classList.remove('hidden');
+      setTimeout(() => fb.classList.add('hidden'), 2000);
+    }
+
+    function downloadScroll() {
+      if (!currentExorcism) return;
+      const md = [
+        `# Exorcism Scroll: ${currentExorcism.curse_name}`,
+        `- **Folio:** ${toRoman(currentExorcism.id || 1)}`,
+        `- **Severity:** ${currentExorcism.severity}`,
+        `- **Language:** ${currentExorcism.language}`,
+        `- **Timestamp:** ${currentExorcism.created_at}`,
+        `\n## Pathology & Root Cause\n${currentExorcism.spectral_diagnosis}`,
+        `\n## Execution Fault Trace\n${currentExorcism.astral_nodes.map(n => `- ${n}`).join('\n')}`,
+        `\n## Purified Code\n\`\`\`${currentExorcism.language.toLowerCase()}\n${currentExorcism.purified_code}\n\`\`\``,
+        `\n## Protection Ward\n${currentExorcism.prevention_ward}`
+      ].join('\n');
+
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `seance-folio-${currentExorcism.id || 'ritual'}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('codeInput').addEventListener('input', updateTelemetry);
+    document.getElementById('languageSelect').addEventListener('change', (e) => {
+      const selectedLang = e.target.value;
+      const matchingSample = sampleList.find(s => s.language === selectedLang);
+      if (matchingSample) {
+        document.getElementById('codeInput').value = matchingSample.code;
+        document.getElementById('errorBanner').classList.add('hidden');
+        updateTelemetry();
+      }
+    });
+    document.getElementById('codeInput').addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        performExorcism();
+      }
+    });
+
+    loadSamples();
+    loadGrimoire();
+    updateTelemetry();
+  </script>
+</body>
+</html>

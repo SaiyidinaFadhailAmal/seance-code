@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Run Pytest & Hypothesis on Python Save",
+  "description": "Automatically runs property-based tests whenever app.py or test files are modified.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "app.py",
+      "tests/*.py"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "pytest -q"
+  }
+}
