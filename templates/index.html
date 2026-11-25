@@ -345,9 +345,15 @@
           <span class="block text-[10px] font-mono-code uppercase tracking-[0.22em] text-[#8c6d36]">Persistent SQLite Ledger</span>
           <h2 class="font-display text-2xl sm:text-3xl font-semibold text-[#eae2d3]">Grimoire of Banished Entities</h2>
         </div>
-        <span id="grimoireCount" class="text-[11px] font-mono-code uppercase tracking-widest px-3 py-1 bg-[#181512] border border-[#c59b52]/30 text-[#c59b52]">
-          0 FOLIOS ARCHIVED
-        </span>
+        <div class="flex items-center gap-2.5">
+          <span id="grimoireCount" class="text-[11px] font-mono-code uppercase tracking-widest px-3 py-1 bg-[#181512] border border-[#c59b52]/30 text-[#c59b52]">
+            0 FOLIOS ARCHIVED
+          </span>
+          <button type="button" onclick="purgeGrimoire()"
+            class="text-[11px] font-mono-code uppercase tracking-wider px-2.5 py-1 bg-[#181512] hover:bg-[#2a1112] border border-[#c59b52]/25 hover:border-[#c84648]/60 text-[#8e8577] hover:text-[#eb8a8c] transition cursor-pointer">
+            Purge Ledger
+          </button>
+        </div>
       </div>
 
       <div id="grimoireGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -545,6 +551,11 @@
         </article>
       `).join('');
       window.__grimoireCache = items;
+    }
+
+    async function purgeGrimoire() {
+      await fetch('/api/grimoire', { method: 'DELETE' });
+      await loadGrimoire();
     }
 
     function copyPurifiedCode() {

@@ -86,7 +86,12 @@ AttributeError: 'NoneType' object has no attribute 'upper' '''
     }
 ]
 
-
+@app.route("/api/grimoire", methods=["DELETE"])
+def clear_grimoire():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("DELETE FROM exorcisms")
+        conn.commit()
+    return jsonify({"status": "purged"})
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("""
